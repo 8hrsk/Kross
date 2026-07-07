@@ -1,0 +1,79 @@
+.PHONY: all build-server build-cli build-client-example build-obfuscated test clean tidy fmt vet help
+
+# Default target
+all: test build-server build-cli
+
+# Build directory
+DIST_DIR = dist
+
+# Go parameters
+GOCMD = go
+GOBUILD = $(GOCMD) build
+GOCLEAN = $(GOCMD) clean
+GOTEST = $(GOCMD) test
+GOGET = $(GOCMD) get
+GOMOD = $(GOCMD) mod
+GOFMT = gofmt
+GOVET = $(GOCMD) vet
+
+# Targets
+build-server:
+	@echo "Building Kross Server..."
+	mkdir -p $(DIST_DIR)
+	$(GOBUILD) -ldflags="-s -w" -o $(DIST_DIR)/kross-server ./cmd/kross-server
+
+build-cli:
+	@echo "Building Kross CLI..."
+	mkdir -p $(DIST_DIR)
+	$(GOBUILD) -ldflags="-s -w" -o $(DIST_DIR)/kross-cli ./cmd/kross-cli
+
+# Standard build of example client without obfuscation
+build-client-example:
+	@echo "Building Example Client (Standard)..."
+	mkdir -p $(DIST_DIR)
+	$(GOBUILD) -o $(DIST_DIR)/client-example ./cmd/client-example.go
+
+# Obfuscated build of example client using garble
+build-obfuscated:
+	@echo "Building Example Client (Obfuscated)..."
+	mkdir -p $(DIST_DIR)
+	@if ! command -v garble >/dev/null; then \
+		echo "Garble not found. Installing mvdan.cc/garble@latest..."; \
+		$(GOCMD) install mvdan.cc/garble@latest; \
+	fi
+	garble -literals -tiny -seed=random build -ldflags="-s -w" -trimpath -o $(DIST_DIR)/client-example-obfuscated ./cmd/client-example.go
+
+test:
+	@echo "Running all tests..."
+	$(GOTEST) -v ./...
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf $(DIST_DIR)
+	rm -f licenses_*.txt
+	$(GOCLEAN)
+
+tidy:
+	@echo "Tidying up Go modules..."
+	$(GOMOD) tidy
+
+fmt:
+	@echo "Formatting source code..."
+	$(GOFMT) -s -w .
+
+vet:
+	@echo "Vetting source code..."
+	$(GOVET) ./...
+
+help:
+	@echo "Kross Makefile commands:"
+	@echo "  all                      - Run tests and build server + cli"
+	@echo "  build-server             - Build the Kross activation server"
+	@echo "  build-cli                - Build the Kross generator/issuer CLI"
+	@echo "  build-client-example     - Build standard client example"
+	@echo "  build-obfuscated         - Build obfuscated client example with garble"
+	@echo "  test                     - Run unit tests for all modules"
+	@echo "  clean                    - Remove compiled binaries and temporary text files"
+	@echo "  tidy                     - Run go mod tidy"
+	@echo "  fmt                      - Format code style using gofmt"
+	@echo "  vet                      - Vet code using go vet"
