@@ -21,8 +21,8 @@ To verify licenses in a client-side Go application:
 Ensure the following packages are imported:
 ```go
 import (
-    "github.com/8hrsk/kross/pkg/client"
-    "github.com/8hrsk/kross/gui"
+    "github.com/8hrsk/Kross/pkg/client"
+    "github.com/8hrsk/Kross/gui"
 )
 ```
 
