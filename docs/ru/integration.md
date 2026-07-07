@@ -24,8 +24,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/user/kross/pkg/client"
-	"github.com/user/kross/gui"
+	"github.com/8hrsk/Kross/pkg/client"
+	"github.com/8hrsk/Kross/gui"
 )
 
 // Публичный ключ, экспортированный разработчиком. Замените на ваши байты.
